@@ -26,11 +26,14 @@ RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
 # Create admin user
-RUN groupadd --gid ${GID} ${USERNAME} && \
-    useradd --uid ${UID} --gid ${GID} -m -s /bin/bash ${USERNAME} && \
-    echo "${USERNAME}:${PASSWORD}" | chpasswd && \
-    usermod -aG sudo ${USERNAME} && \
-    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && \
+# Create admin user (robust if UID/GID taken)
+RUN set -eux; \
+    if ! id -u ${USERNAME} >/dev/null 2>&1; then \
+        useradd -m -s /bin/bash ${USERNAME}; \
+    fi; \
+    echo "${USERNAME}:${PASSWORD}" | chpasswd; \
+    usermod -aG sudo ${USERNAME}; \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}; \
     chmod 0440 /etc/sudoers.d/${USERNAME}
 
 # SSH setup
