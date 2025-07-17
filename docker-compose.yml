@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  ultra:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERNAME: jam
+        PASSWORD: jam
+    container_name: ultra
+    hostname: ultra
+    ports:
+      - "2222:22"
+    volumes:
+      - ./authorized_keys:/home/jam/.ssh/authorized_keys:ro
+    restart: unless-stopped
